@@ -645,17 +645,29 @@ sub _setup_bash_aliases {
 		if (0 == index($line, '#')) {
 			next;
 		}
-		if (0 <= index($line, 'alias l=')) {
+		if (0 == index($line, 'alias l=')) {
 			$target->{'l'}++;
 		}
-		elsif (0 <= index($line, 'alias n=')) {
+		elsif (0 == index($line, 'alias n=')) {
 			$target->{'n'}++;
 		}
-		elsif (0 <= index($line, 'alias u=')) {
+		elsif (0 == index($line, 'alias u=')) {
 			$target->{'u'}++;
 		}
-		elsif (0 <= index($line, 'alias g=')) {
+		elsif (0 == index($line, 'alias g=')) {
 			$target->{'g'}++;
+		}
+		elsif (0 == index($line, 'alias .add=')) {
+			$target->{'.add'}++;
+		}
+		elsif (0 == index($line, 'alias .commit=')) {
+			$target->{'.commit'}++;
+		}
+		elsif (0 == index($line, 'alias .push=')) {
+			$target->{'.push'}++;
+		}
+		elsif (0 == index($line, 'alias .pull=')) {
+			$target->{'.pull'}++;
 		}
 	}
 	close($stream);
@@ -1047,61 +1059,77 @@ sub _setup_bash_aliases {
 	out::println('## [~.bash_aliases]');
 	directory::cd_home();
 	my $stream = undef;
-	my $target = new hashmap();
-	$target->{'alias l'}++;
-	$target->{'alias n'}++;
-	$target->{'alias u'}++;
-	$target->{'alias g'}++;
-	$target->{'alias rm'}++;
-	if (!open($stream, '.bash_aliases')) {
-		out::println('[info] ~/.bash_aliases はまだありません');
-	}
+	my $aliases = undef;
+	open($stream, '.bash_aliases');
 	while (my $line = <$stream>) {
 		if (0 == index($line, '#')) {
 			next;
 		}
 		if (0 <= index($line, 'alias l=')) {
-			delete($target->{'alias l'});
+			$aliases->{'alias l'}++;
 		}
 		elsif (0 <= index($line, 'alias n=')) {
-			delete($target->{'alias n'});
+			$aliases->{'alias n'}++;
 		}
 		elsif (0 <= index($line, 'alias u=')) {
-			delete($target->{'alias u'});
+			$aliases->{'alias u'}++;
 		}
 		elsif (0 <= index($line, 'alias g=')) {
-			delete($target->{'alias g'});
+			$aliases->{'alias g'}++;
 		}
 		elsif (0 <= index($line, 'alias rm=')) {
-			delete($target->{'alias rm'});
+			$aliases->{'alias rm'}++;
+		}
+		elsif (0 <= index($line, 'alias .add=')) {
+			$aliases->{'alias .add'}++;
+		}
+		elsif (0 <= index($line, 'alias .commit=')) {
+			$aliases->{'alias .commit'}++;
+		}
+		elsif (0 <= index($line, 'alias .push=')) {
+			$aliases->{'alias .push'}++;
+		}
+		elsif (0 <= index($line, 'alias .pull=')) {
+			$aliases->{'alias .pull'}++;
 		}
 	}
 	close($stream);
-	if ($target->is_empty()) {
-		out::println('[~/.bash_aliases] nothing to do...');
-		out::println();
-		return;
-	}
 	my $file = new file_transaction('.bash_aliases');
-	if ($target->{'alias l'}) {
+	if (!$aliases->{'alias l'}) {
 		out::println('[trace] appending alias...');
 		$file->append_line('alias l=\'/bin/ls -lF --full-time\'');
 	}
-	if ($target->{'alias n'}) {
+	if (!$aliases->{'alias n'}) {
 		out::println('[trace] appending alias...');
 		$file->append_line('alias n=\'/bin/ls -ltrF --full-time\'');
 	}
-	if ($target->{'alias u'}) {
+	if (!$aliases->{'alias u'}) {
 		out::println('[trace] appending alias...');
 		$file->append_line('alias u=\'cd ..\'');
 	}
-	if ($target->{'alias g'}) {
+	if (!$aliases->{'alias g'}) {
 		out::println('[trace] appending alias...');
 		$file->append_line('alias g=\'git\'');
 	}
-	if ($target->{'alias rm'}) {
+	if (!$aliases->{'alias rm'}) {
 		out::println('[trace] appending alias...');
 		$file->append_line('alias rm=\'/bin/rm -i\'');
+	}
+	if (!$aliases->{'alias .add'}) {
+		out::println('[trace] appending alias...');
+		$file->append_line('alias .add=\'git add\'');
+	}
+	if (!$aliases->{'alias .commit'}) {
+		out::println('[trace] appending alias...');
+		$file->append_line('alias .commit="git commit --allow-empty-message -m \\"\\""');
+	}
+	if (!$aliases->{'alias .push'}) {
+		out::println('[trace] appending alias...');
+		$file->append_line('alias .push=\'git push\'');
+	}
+	if (!$aliases->{'alias .pull'}) {
+		out::println('[trace] appending alias...');
+		$file->append_line('alias .pull=\'git pull\'');
 	}
 	# done
 	out::println('[~/.bash_aliases] ok.');

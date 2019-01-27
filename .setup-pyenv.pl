@@ -2,6 +2,7 @@
 # coding: utf-8
 
 use strict;
+use utf8;
 
 sub _println {
 
@@ -36,6 +37,10 @@ sub _git_exists {
 }
 
 sub _main {
+
+	binmode(STDIN, ':utf8');
+	binmode(STDOUT, ':utf8');
+	binmode(STDERR, ':utf8');
 
 	chdir();
 

@@ -1851,46 +1851,68 @@ sub setup {
 ###############################################################################
 package main;
 
-sub _diagnose_os {
+sub _read_os_name {
+	my ($line) = @_;
+	if (0 <= index($line, 'Amazon Linux')) {
+		return 'Amazon Linux';
+	}
+	if (0 <= index($line, 'CentOS')) {
+		return 'CentOS';
+	}
+	if (0 <= index($line, 'Red Hat Enterprise Linux')) {
+		return 'Red Hat Enterprise Linux';
+	}
+	if (0 <= index($line, 'Ubuntu')) {
+		return 'Ubuntu';
+	}
+	if (0 <= index($line, 'Debian')) {
+		return 'Debian';
+	}
+	if (0 <= index($line, 'Darwin')) {
+		return 'macOS';
+	}
+	return '';
+}
+
+sub _uname {
 
 	my $stream = undef;
-	if (!open($stream, '/etc/os-release')) {
-		if (!open($stream, '/etc/redhat-release')) {
-		}
-	}
-	my $name = '';
-	while (my $line = <$stream>) {
-		if (0 <= index($line, 'Amazon Linux')) {
-			$name = 'Amazon Linux';
-		}
-		elsif (0 <= index($line, 'CentOS')) {
-			$name = 'CentOS';
-		}
-		elsif (0 <= index($line, 'Red Hat Enterprise Linux')) {
-			$name = 'Red Hat Enterprise Linux';
-		}
-		elsif (0 <= index($line, 'Ubuntu')) {
-			$name = 'Ubuntu';
-		}
-		elsif (0 <= index($line, 'Debian')) {
-			$name = 'Debian';
-		}
-	}
+	open($stream, 'uname -a |');
+	my $line = <$stream>;
 	close($stream);
+	return $line;
+}
 
-	# Mac OS の判定
-	{
-		if (!open($stream, 'uname -a |')) {
-			out::println('[ERROR] Cannot execute uname -a.', $!);
+sub _diagnose_os {
+
+	my $os_name = '';
+
+	# Recognize:
+	#   Rad Hat, CentOS, Ubuntu, Debian, Amazon Linux
+	if (!length($os_name)) {
+		my $stream = undef;
+		if (!open($stream, '/etc/os-release')) {
+			if (!open($stream, '/etc/redhat-release')) {
+			}
 		}
-		my $line = <$stream>;
-		if ($line =~ m/Darwin/ms) {
-			$name = 'macOS';
+		my $os_name = '';
+		while (my $line = <$stream>) {
+			$os_name = _read_os_name($line);
+			if (length($os_name)) {
+				last;
+			}
 		}
 		close($stream);
 	}
 
-	return $name;
+	# Recognize:
+	#   Mac OS
+	if (!length($os_name)) {
+		my $uname = _uname();
+		$os_name = _read_os_name($uname);
+	}
+
+	return $os_name;
 }
 
 sub _main {
@@ -1904,29 +1926,29 @@ sub _main {
 
 
 	out::println('## HELLO');
-	my $os_description = _diagnose_os();
+	my $os_name = _diagnose_os();
 
-	if ('Amazon Linux' eq $os_description) {
+	if ('Amazon Linux' eq $os_name) {
 		out::println('[info] Great! Amazon Linux found!');
 		out::println();
 		amazon_linux::setup();
 	}
-	elsif ('Ubuntu' eq $os_description) {
+	elsif ('Ubuntu' eq $os_name) {
 		out::println('[info] Great! Ubuntu is the smartest way!');
 		out::println();
 		ubuntu::setup();
 	}
-	elsif ('Debian' eq $os_description) {
+	elsif ('Debian' eq $os_name) {
 		out::println('[info] Excellent! Debian is elegant operating system!');
 		out::println();
 		debian::setup();
 	}
-	elsif ('CentOS' eq $os_description) {
+	elsif ('CentOS' eq $os_name) {
 		out::println('[info] Good! I love CentOS!');
 		out::println();
 		centos::setup();
 	}
-	elsif ('macOS' eq $os_description) {
+	elsif ('macOS' eq $os_name) {
 		out::println('[info] macOS! Wonderful OS!');
 		out::println();
 		# centos::setup();

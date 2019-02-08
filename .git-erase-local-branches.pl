@@ -55,7 +55,7 @@ sub delete_local_branch {
 		return;
 	}
 
-	system('git', 'branch', '--delete', $name);
+	system('git', 'branch', '-D', $name);
 }
 
 sub show_local_branches {

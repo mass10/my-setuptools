@@ -1,5 +1,13 @@
 #!/usr/bin/env perl
 # coding: utf-8
+#
+#
+#
+# いろいろセットアップ
+#
+#
+#
+#
 
 use strict;
 use utf8;
@@ -1017,12 +1025,13 @@ sub append_line {
 ###############################################################################
 package ubuntu;
 
-sub _setup_bash {
+sub _setup_ubuntu_bash {
 
 	out::println('## [~.bashrc]');
 	directory::cd_home();
 	my $stream = undef;
 	open($stream, '.bashrc');
+	binmode($stream, ':utf8');
 	my $status = '';
 	while (my $line = <$stream>) {
 		$line = util::trim($line);
@@ -1054,7 +1063,7 @@ sub _setup_bash {
 	out::println();
 }
 
-sub _setup_bash_aliases {
+sub _setup_ubuntu_bash_aliases {
 
 	out::println('## [~.bash_aliases]');
 	directory::cd_home();
@@ -1150,12 +1159,10 @@ sub _has_git_installed {
 	return 1;
 }
 
-sub _setup_git {
+sub _setup_ubuntu_git {
 
 	out::println('## [Git]');
-	# if (!_has_git_installed()) {
-		system('sudo', 'apt-get', 'install', 'git');
-	# }
+	system('sudo', 'apt-get', 'install', 'git');
 	if (!_has_git_installed()) {
 		out::println('[Git] ... [canceled]');
 		return;
@@ -1164,7 +1171,7 @@ sub _setup_git {
 	out::println();
 }
 
-sub _setup_vim {
+sub _setup_ubuntu_vim {
 
 	out::println('## [Vim]');
 	if (!prompt::confirm('Vim のセットアップをしますか？')) {
@@ -1189,7 +1196,7 @@ sub _setup_vim {
 	out::println();
 }
 
-sub _setup_cpanm {
+sub _setup_ubuntu_cpanm {
 
 	out::println('## [cpanm for root]');
 	if (!prompt::confirm('root ユーザーに cpanm のセットアップをしますか？')) {
@@ -1205,15 +1212,20 @@ sub _setup_cpanm {
 	out::println('');
 }
 
+sub _ubuntu_install_tools {
+
+	system('sudo', 'apt', 'install', 'curl');
+	system('sudo', 'apt', 'install', 'net-tools');
+}
+
 sub setup {
 
-	system('apt', 'install', 'curl');
-	system('apt', 'install', 'net-tools');
-	_setup_bash();
-	_setup_bash_aliases();
-	_setup_git();
-	_setup_vim();
-	_setup_cpanm();
+	_ubuntu_install_tools();
+	_setup_ubuntu_bash();
+	_setup_ubuntu_bash_aliases();
+	_setup_ubuntu_git();
+	_setup_ubuntu_vim();
+	_setup_ubuntu_cpanm();
 }
 
 

@@ -27,6 +27,10 @@ sub _remove_main {
 
 sub _main {
 
+	binmode(STDIN, ':utf8');
+	binmode(STDOUT, ':utf8');
+	binmode(STDERR, ':utf8');
+
 	_remove_main();
 }
 

@@ -67,6 +67,10 @@ sub _remove_dead_containers {
 
 sub _main {
 
+	binmode(STDIN, ':utf8');
+	binmode(STDOUT, ':utf8');
+	binmode(STDERR, ':utf8');
+
 	_remove_dead_containers();
 }
 
